@@ -121,16 +121,27 @@ public:
 
     void    makeCompatible(int srcVer, int tarVer)
     {
-        // still buggy, having problem with transitive property 
-        for(auto x : records[srcVer])
+       
+        auto new_bucket = &records[tarVer];
+        auto src_bucket = records[srcVer];
+        auto tar_bucket_copy = records[tarVer];
+
+        // appending values in source bucket
+        for(auto &x: src_bucket)
         {
-            records[tarVer].insert(x);
-            records[x] = records[tarVer];
-            records[srcVer].erase(x);
+            new_bucket->insert(x);
         }
 
-        records[tarVer].insert(srcVer);
-        records[srcVer] = records[tarVer];
+        // making pointers right 
+        for(auto &x: src_bucket)
+        {
+            records[x]= *new_bucket;
+        }
+
+        for(auto &x: tar_bucket_copy)
+        {
+            records[x]= *new_bucket;
+        }
     }
 
     void    __print__()
@@ -138,6 +149,7 @@ public:
         for(auto x: records)
         {
             cout<<x.first<<"-> {\n";
+            // TODO: need to print the address of hashset i.e., x.second, &x.second gives same address
             for(auto y : x.second)
             {
                 cout<<"\t"<<y<<"\n";
@@ -145,6 +157,7 @@ public:
             cout<<"}\n";
         }
     }
+
 };
 
 int main()
