@@ -1,6 +1,5 @@
 # machine-coding
-Contains coding questions similar to machine coding round
-
+This repository contains low level system design questions and coding questions in interview.
 
 c++ script command 
 
