@@ -23,6 +23,8 @@ a less asked query
 2. but reads is very much so make reads fast 
 
 so design the ds according to that.
+
+NOTE: this solution is case specific, meaning "The" is different from "the"
 */
 
 
@@ -40,10 +42,11 @@ class WordRecommender
 {
 private:
 
-unordered_map< string,unordered_map<string,int> > freqTable;
-unordered_map<string,string> values;
-vector< vector<string> > tokenList;
-string empty = "";
+unordered_map< string,unordered_map<string,int> >   freqTable;
+unordered_map<string,string>                        values;
+vector< vector<string> >                            tokenList;
+string                                              empty;
+bool                                                caseSensitive; 
 
 void    __stringToToken__(vector<string>& inputStrings)
 {
@@ -62,6 +65,18 @@ void    __stringToToken__(vector<string>& inputStrings)
         }
 }
 
+
+
+void    __toLowerCase__()
+{
+    for(auto &vec:tokenList)
+    {
+        for(string &s:vec)
+        {
+            transform(s.begin(), s.end(), s.begin(), ::tolower);
+        }
+    }
+}
 void    __makeFreqTable__()
 {
     freqTable.clear();
@@ -79,28 +94,51 @@ void    __makeFreqTable__()
 void    __updateValues__()
 {
     for(auto &umap: freqTable)
+    {
+        int counter  =0;
+        string value;
+        for(auto &obj:umap.second)
         {
-            int counter  =0;
-            string value;
-            for(auto &obj:umap.second)
+            if(obj.second>counter)
             {
-                if(obj.second>counter)
-                {
-                    counter = obj.second;
-                    value = obj.first;
-                }
+                counter = obj.second;
+                value = obj.first;
             }
-            values[umap.first] = value;
         }
+        values[umap.first] = value;
+    }
 }
 
+
+void    __printFreqTable__()
+{
+    for(auto &x: freqTable)
+    {
+        cout<<x.first<<"\n\t{";
+        for(auto &y: x.second)
+        {
+            cout<<"\n\t"<<y.first<<"\t->\t"<<y.second<<"\n";
+        }
+        cout<<"\n\n\n";
+    }
+
+    
+}
 public:
+
+        WordRecommender(bool isCaseSensitive = false)
+        {
+            caseSensitive = isCaseSensitive;
+            empty = "";
+        }
 
 void    insert(vector<string> rawData)
 {
     __stringToToken__(rawData);
 
-    // still buggy, the value is not updated properly 
+    if(!caseSensitive)
+        __toLowerCase__();
+
     __makeFreqTable__();
 
     __updateValues__();
@@ -114,6 +152,11 @@ string  suggest(string word)
     }
     else
         return empty;
+}
+
+void    printFreqTable()
+{
+    __printFreqTable__();
 }
 
 };
@@ -132,7 +175,9 @@ int main()
     WordRecommender Recommender;
     Recommender.insert(values);
     
-    string result = Recommender.suggest("The");
+    //Recommender.printFreqTable();
+
+    string result = Recommender.suggest("the");
     cout<<result;
 
     return 0;
